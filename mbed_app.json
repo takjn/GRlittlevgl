@@ -1,0 +1,59 @@
+{
+    "config": {
+        "camera":{
+            "help": "0:disable 1:enable",
+            "value": "1"
+        },
+        "camera-type":{
+            "help": "Please see EasyAttach_CameraAndLCD/README.md",
+            "value": null
+        },
+        "lcd":{
+            "help": "0:disable 1:enable",
+            "value": "1"
+        },
+        "lcd-type":{
+            "help": "Please see EasyAttach_CameraAndLCD/README.md",
+            "value": null
+        }
+    },
+    "target_overrides": {
+        "*": {
+            "platform.stdio-baud-rate": 115200,
+            "platform.stdio-convert-newlines": true,
+            "target.components": ["FLASHIAP"],
+            "target.macros_add": ["MBED_CONF_APP_MAIN_STACK_SIZE=8192",
+                                  "MBEDTLS_USER_CONFIG_FILE=\"mbedtls_entropy_config.h\""]
+        },
+        "GR_MANGO": {
+            "target.macros_add": ["MBEDTLS_TEST_NULL_ENTROPY",
+                                  "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"]
+        },
+        "RZ_A2M_EVB": {
+            "target.bootloader_img" : "bootloader_d_n_d/RZ_A2M_EVB_boot.bin",
+            "target.app_offset"     : "0x40000",
+            "target.macros_add": ["MBEDTLS_TEST_NULL_ENTROPY",
+                                  "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"]
+        },
+        "RZ_A2M_EVB_HF": {
+            "target.bootloader_img" : "bootloader_d_n_d/RZ_A2M_EVB_HF_boot.bin",
+            "target.app_offset"     : "0x40000",
+            "target.macros_add": ["MBEDTLS_TEST_NULL_ENTROPY",
+                                  "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"]
+        },
+        "RZ_A2M_SBEV": {
+            "target.bootloader_img" : "bootloader_d_n_d/RZ_A2M_SBEV_boot.bin",
+            "target.app_offset"     : "0x40000",
+            "target.macros_add": ["OVERRIDE_CONSOLE_USBSERIAL",
+                                  "MBEDTLS_TEST_NULL_ENTROPY",
+                                  "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"]
+        },
+        "SEMB1402": {
+            "target.bootloader_img" : "bootloader_d_n_d/SEMB1402_boot.bin",
+            "target.app_offset"     : "0x40000",
+            "target.macros_add": ["OVERRIDE_CONSOLE_USBSERIAL",
+                                  "MBEDTLS_TEST_NULL_ENTROPY",
+                                  "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES"]
+        }
+    }
+}
