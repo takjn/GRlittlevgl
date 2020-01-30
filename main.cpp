@@ -1,8 +1,8 @@
 #include "mbed.h"
-#include "USBHostMouse.h"
 #include "dcache-control.h"
 #include "EasyAttach_CameraAndLCD.h"
 #include "lvgl/lvgl.h"
+#include "lv_port_indev.h"
 
 // Demo program
 #include "lv_examples/lv_examples.h"
@@ -103,100 +103,6 @@ void lv_port_disp_init(void)
 
     // Finally register the driver
     lv_disp_drv_register(&disp_drv);
-}
-
-static uint8_t m_b;
-static int m_x, m_y;
-
-void onMouseEvent(uint8_t buttons, int8_t x, int8_t y, int8_t z) {
-    printf("buttons: %d, x: %d, y: %d, z: %d\r\n", buttons, x, y, z);
-    m_x += x;
-    if (m_x < 0) m_x = 0;
-    if (uint(m_x) > LCD_PIXEL_WIDTH) m_x = LCD_PIXEL_WIDTH;
-    m_y += y;
-    if (m_y < 0) m_y = 0;
-    if (uint(m_y) > LCD_PIXEL_HEIGHT) m_x = LCD_PIXEL_HEIGHT;
-
-    m_b = buttons;
-
-}
-
-void mouse_task() {
-    USBHostMouse mouse;
-    
-    while(1) {
-        // try to connect a USB mouse
-        while(!mouse.connect())
-            ThisThread::sleep_for(500);
-    
-        // when connected, attach handler called on mouse event
-        mouse.attachEvent(onMouseEvent);
-        
-        // wait until the mouse is disconnected
-        while(mouse.connected())
-            ThisThread::sleep_for(500);
-    }
-}
-
-// Initialize the mouse
-static void mouse_init(void)
-{
-    static Thread mouseTask;
-    mouseTask.start(mouse_task);
-
-    m_x = LCD_PIXEL_WIDTH / 2;
-    m_y = LCD_PIXEL_HEIGHT / 2;
-}
-
-// Return true is the mouse button is pressed
-static bool mouse_is_pressed(void)
-{
-    return (m_b != 0);
-}
-
-// Get the x and y coordinates if the mouse is pressed
-static void mouse_get_xy(lv_coord_t * x, lv_coord_t * y)
-{
-    (*x) = m_x;
-    (*y) = m_y;
-}
-
-
-// Will be called by the library to read the mouse
-static bool mouse_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
-{
-    // Get the current x and y coordinates
-    mouse_get_xy(&data->point.x, &data->point.y);
-
-    // Get whether the mouse button is pressed or released
-    if(mouse_is_pressed()) {
-        data->state = LV_INDEV_STATE_PR;
-    } else {
-        data->state = LV_INDEV_STATE_REL;
-    }
-
-    // Return `false` because we are not buffering and no more data to read
-    return false;
-}
-
-lv_indev_t * indev_mouse;
-void lv_port_indev_init(void)
-{
-    lv_indev_drv_t indev_drv;
-
-    /*Initialize your touchpad if you have*/
-    mouse_init();
-
-    /*Register a mouse input device*/
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.type = LV_INDEV_TYPE_POINTER;
-    indev_drv.read_cb = mouse_read;
-    indev_mouse = lv_indev_drv_register(&indev_drv);
-
-    /*Set cursor. For simplicity set a HOME symbol now.*/
-    lv_obj_t * mouse_cursor = lv_img_create(lv_disp_get_scr_act(NULL), NULL);
-    lv_img_set_src(mouse_cursor, LV_SYMBOL_HOME);
-    lv_indev_set_cursor(indev_mouse, mouse_cursor);
 }
 
 // Initialize LittlevGL
