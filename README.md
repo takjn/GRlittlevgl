@@ -15,6 +15,11 @@ arm-none-eabi-g++ (15:6.3.1+svn253039-1build1) 6.3.1 20170620
 ```
 
 ## Note
+### Change display resolution
+The default resolution is 480 x 272.
+If you want to use another display, plese do not forget to modify `LV_HOR_RES_MAX` and `LV_VER_RES_MAX` in `lv_conf.h`.
+
+### USB mouse
 If the mouse doesn't work well, You may need a hack in `mbed-gr-libs/USBHost_custom/USBHostHID/USBHostMouse.cpp`.
 
 ```

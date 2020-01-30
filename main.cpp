@@ -45,14 +45,16 @@ static void gr_disp_init(void) {
     EasyAttach_LcdBacklight(true);
 }
 
+// Set a pixel color. Use RGB565 format.
+// Do not forget to call gr_disp_flush() after calling this function.
 static void gr_disp_set_pixel(int x, int y, uint16_t color) {
     int i = FRAME_BUFFER_STRIDE * y + x * 2;
     user_frame_buffer0[i + 0] = (color & 0xFF); // GB
-    user_frame_buffer0[i + 1] = (color >> 8); // RG
+    user_frame_buffer0[i + 1] = (color >> 8);   // RG
 }
 
+// Clean dcache to flush display buffer
 static void gr_disp_flush(void) {
-    // Data cache clean
     dcache_clean(user_frame_buffer0, sizeof(user_frame_buffer0));
 }
 
@@ -78,17 +80,17 @@ static void lv_port_disp_init(void)
 {
     // Create a buffer for drawing
     static lv_disp_buf_t disp_buf_2;
-    static lv_color_t buf2_1[LV_HOR_RES_MAX * 10];                        /*A buffer for 10 rows*/
-    static lv_color_t buf2_2[LV_HOR_RES_MAX * 10];                        /*An other buffer for 10 rows*/
-    lv_disp_buf_init(&disp_buf_2, buf2_1, buf2_2, LV_HOR_RES_MAX * 10);   /*Initialize the display buffer*/
+    static lv_color_t buf2_1[LV_HOR_RES_MAX * 10];
+    static lv_color_t buf2_2[LV_HOR_RES_MAX * 10];
+    lv_disp_buf_init(&disp_buf_2, buf2_1, buf2_2, LV_HOR_RES_MAX * 10);
 
     // Register the display in LittlevGL
-    lv_disp_drv_t disp_drv;                         /*Descriptor of a display driver*/
-    lv_disp_drv_init(&disp_drv);                    /*Basic initialization*/
+    lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
 
     // Set the resolution of the display
-    disp_drv.hor_res = LCD_PIXEL_WIDTH;
-    disp_drv.ver_res = LCD_PIXEL_HEIGHT;
+    disp_drv.hor_res = LV_HOR_RES_MAX;
+    disp_drv.ver_res = LV_VER_RES_MAX;
 
     // Used to copy the buffer's content to the display
     disp_drv.flush_cb = disp_flush;
@@ -112,14 +114,17 @@ static void littlevgl_init() {
     lv_port_disp_init();
     lv_port_indev_init();
 
+    // Start ticker for LittlevGL
     static Ticker ticker;
     ticker.attach_us(&lv_tick_inc_handler, 1000); // 1 ms
 }
 
 int main() {
+    // Initialize Gadget Renesas display
     EasyAttach_Init(Display);
     gr_disp_init();
 
+    // Initialize LittlevGL
     littlevgl_init();
 
 #if (1)
