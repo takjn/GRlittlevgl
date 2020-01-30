@@ -12,7 +12,6 @@
 #include "lv_port_indev.h"
 #include "mbed.h"
 #include "USBHostMouse.h"
-#include "EasyAttach_CameraAndLCD.h"
 
 /*********************
  *      DEFINES
@@ -240,10 +239,10 @@ static void onMouseEvent(uint8_t buttons, int8_t x, int8_t y, int8_t z) {
     printf("buttons: %d, x: %d, y: %d, z: %d\r\n", buttons, x, y, z);
     m_x += x;
     if (m_x < 0) m_x = 0;
-    if (uint(m_x) > LCD_PIXEL_WIDTH) m_x = LCD_PIXEL_WIDTH;
+    if (uint(m_x) > LV_HOR_RES_MAX) m_x = LV_HOR_RES_MAX;
     m_y += y;
     if (m_y < 0) m_y = 0;
-    if (uint(m_y) > LCD_PIXEL_HEIGHT) m_x = LCD_PIXEL_HEIGHT;
+    if (uint(m_y) > LV_VER_RES_MAX) m_x = LV_VER_RES_MAX;
 
     m_b = buttons;
 
@@ -272,8 +271,8 @@ static void mouse_init(void)
     static Thread mouseTask;
     mouseTask.start(mouse_task);
 
-    m_x = LCD_PIXEL_WIDTH / 2;
-    m_y = LCD_PIXEL_HEIGHT / 2;
+    m_x = LV_HOR_RES_MAX / 2;
+    m_y = LV_VER_RES_MAX / 2;
 }
 
 /* Will be called by the library to read the mouse */
