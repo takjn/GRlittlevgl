@@ -17,7 +17,7 @@ static uint8_t user_frame_buffer0[FRAME_BUFFER_STRIDE * FRAME_BUFFER_HEIGHT]__at
 
 DisplayBase Display;
 
-static void disp_init(void) {
+static void gr_disp_init(void) {
     // Initialize the background to black
     for (uint32_t i = 0; i < sizeof(user_frame_buffer0); i += 2) {
         user_frame_buffer0[i + 0] = 0x00;
@@ -45,16 +45,15 @@ static void disp_init(void) {
     EasyAttach_LcdBacklight(true);
 }
 
-void set_pixel(int x, int y, lv_color_t color) {
+static void gr_disp_set_pixel(int x, int y, uint16_t color) {
     int i = FRAME_BUFFER_STRIDE * y + x * 2;
-    user_frame_buffer0[i + 0] = (color.full & 0xFF); // GB
-    user_frame_buffer0[i + 1] = (color.full >> 8); // RG
+    user_frame_buffer0[i + 0] = (color & 0xFF); // GB
+    user_frame_buffer0[i + 1] = (color >> 8); // RG
 }
 
-Ticker ticker;
-void lv_tick_inc_handler() {
-    lv_tick_inc(1);
-    lv_task_handler();
+static void gr_disp_flush(void) {
+    // Data cache clean
+    dcache_clean(user_frame_buffer0, sizeof(user_frame_buffer0));
 }
 
 static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
@@ -64,23 +63,19 @@ static void disp_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
     int32_t y;
     for(y = area->y1; y <= area->y2; y++) {
         for(x = area->x1; x <= area->x2; x++) {
-            set_pixel(x, y, *color_p);  /* Put a pixel to the display.*/
+            gr_disp_set_pixel(x, y, (*color_p).full);  /* Put a pixel to the display.*/
             color_p++;
         }
     }
 
-    // Data cache clean
-    dcache_clean(user_frame_buffer0, sizeof(user_frame_buffer0));
+    gr_disp_flush();
 
     // Inform the graphics library that you are ready with the flushing
     lv_disp_flush_ready(disp_drv);
 }
 
-void lv_port_disp_init(void)
+static void lv_port_disp_init(void)
 {
-    // Initialize Gadged Renesas display
-    disp_init();
-
     // Create a buffer for drawing
     static lv_disp_buf_t disp_buf_2;
     static lv_color_t buf2_1[LV_HOR_RES_MAX * 10];                        /*A buffer for 10 rows*/
@@ -105,16 +100,25 @@ void lv_port_disp_init(void)
     lv_disp_drv_register(&disp_drv);
 }
 
+// Ticker for LittlevGL
+static void lv_tick_inc_handler() {
+    lv_tick_inc(1); // 1 ms
+    lv_task_handler();
+}
+
 // Initialize LittlevGL
-void littlevgl_init() {
-    ticker.attach_us(&lv_tick_inc_handler, 1000); // 1 ms
+static void littlevgl_init() {
     lv_init();
     lv_port_disp_init();
     lv_port_indev_init();
+
+    static Ticker ticker;
+    ticker.attach_us(&lv_tick_inc_handler, 1000); // 1 ms
 }
 
 int main() {
     EasyAttach_Init(Display);
+    gr_disp_init();
 
     littlevgl_init();
 
