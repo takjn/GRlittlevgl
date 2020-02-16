@@ -9,10 +9,6 @@ LittlevGL demo for GR-LYCHEE
 - Reset the board.
 
 ## Note
-### Change display resolution
-The default resolution is 480 x 272.
-If you want to use another display, please change `LV_HOR_RES_MAX` and `LV_VER_RES_MAX` in `lv_conf.h`.
-
 ### USB mouse
 If the mouse doesn't work well, you may need a hack in `mbed-gr-libs/USBHost_custom/USBHostHID/USBHostMouse.cpp`.
 

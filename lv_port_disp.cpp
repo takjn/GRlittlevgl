@@ -142,9 +142,13 @@ static void lv_tick_inc_handler() {
 // Set a pixel color. Use RGB565 format.
 // Do not forget to call dcache_clean() after calling this function.
 static void set_pixel(int x, int y, uint16_t color) {
-    int i = FRAME_BUFFER_STRIDE * y + x * 2;
-    user_frame_buffer0[i + 0] = (color & 0xFF); // GB
-    user_frame_buffer0[i + 1] = (color >> 8);   // RG
+    // int i = FRAME_BUFFER_STRIDE * y + x * 2;
+    // user_frame_buffer0[i + 0] = (color & 0xFF); // GB
+    // user_frame_buffer0[i + 1] = (color >> 8);   // RG
+
+    int i = (((LCD_PIXEL_WIDTH) + 31u) & ~31u) * y + x;
+    uint16_t *p = (uint16_t*)user_frame_buffer0;
+    p[i] = color;
 }
 
 /* Initialize your display and the required peripherals. */
