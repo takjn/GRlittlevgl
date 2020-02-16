@@ -20,7 +20,7 @@ int main() {
     // Initialize LittlevGL
     littlevgl_init();
 
-#if (1)
+#if (0)
     // Start LittlevGL demo
     demo_create();
 #else
